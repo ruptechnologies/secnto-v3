@@ -1,1 +1,26 @@
 
+{
+  "name": "Secnto AI Search Engine",
+  "short_name": "Secnto",
+  "description": "Secnto: Pakistan’s first ultra-fast and privacy-focused AI-powered search engine and digital platform concept.",
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "scope": "/",
+  "background_color": "#374151",
+  "theme_color": "#00A968",
+  "orientation": "portrait-primary"
+}
