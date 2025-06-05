@@ -1,0 +1,549 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Secnto - AI Search</title>
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#00A968">
+
+    <!-- Apple PWA Meta Tags -->
+    <meta name="mobile-web-app-capable" content="yes"> <!-- Updated from apple-mobile-web-app-capable -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Secnto">
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+    <!-- Add more Apple touch icon sizes if needed -->
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              'secnto-green': '#00A968',
+              'secnto-green-dark': '#007F4E',
+              'secnto-blue': '#0077B6',
+              'secnto-gray': {
+                DEFAULT: '#F0F2F5',
+                dark: '#374151', 
+                text: '#4A5568',
+                'text-dark': '#E2E8F0'
+              },
+            },
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+            },
+          },
+        },
+      }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+      body {
+        font-family: 'Inter', 'sans-serif';
+      }
+      .urdu-text {
+        font-family: 'Noto Nastaliq Urdu', serif;
+        direction: rtl;
+      }
+
+      /* New Box Shadow Animation for Loading Input */
+      @keyframes rgb-box-shadow-animation-light {
+        0% { box-shadow: 0 0 0 2px #FF5252; }
+        17% { box-shadow: 0 0 0 2px #FFAB40; }
+        33% { box-shadow: 0 0 0 2px #FFFF00; }
+        50% { box-shadow: 0 0 0 2px #00E676; }
+        67% { box-shadow: 0 0 0 2px #40C4FF; }
+        83% { box-shadow: 0 0 0 2px #7C4DFF; }
+        100% { box-shadow: 0 0 0 2px #FF5252; }
+      }
+      @keyframes rgb-box-shadow-animation-dark {
+        0% { box-shadow: 0 0 0 2px #E53935; }
+        17% { box-shadow: 0 0 0 2px #FB8C00; }
+        33% { box-shadow: 0 0 0 2px #FDD835; }
+        50% { box-shadow: 0 0 0 2px #00A968; }
+        67% { box-shadow: 0 0 0 2px #1E88E5; }
+        83% { box-shadow: 0 0 0 2px #8E24AA; }
+        100% { box-shadow: 0 0 0 2px #E53935; }
+      }
+
+      .searching-rgb-shadow { /* New class for input loading indicator */
+        outline: none !important; 
+        z-index: 25; 
+        animation-duration: 1.5s;
+        animation-timing-function: linear;
+        animation-iteration-count: infinite;
+        /* Base box-shadow for animation, color will be overridden by keyframes */
+        box-shadow: 0 0 0 2px transparent; 
+      }
+      html:not(.dark) .searching-rgb-shadow {
+        animation-name: rgb-box-shadow-animation-light;
+      }
+      html.dark .searching-rgb-shadow {
+        animation-name: rgb-box-shadow-animation-dark;
+      }
+      
+      /* Keyframes for suggestions list border color animation (kept for suggestions list) */
+      @keyframes rgb-border-animation-light {
+        0% { border-color: #FF5252; } 
+        17% { border-color: #FFAB40; }
+        33% { border-color: #FFFF00; }
+        50% { border-color: #00E676; }
+        67% { border-color: #40C4FF; }
+        83% { border-color: #7C4DFF; }
+        100% { border-color: #FF5252; }
+      }
+      @keyframes rgb-border-animation-dark {
+        0% { border-color: #E53935; }
+        17% { border-color: #FB8C00; }
+        33% { border-color: #FDD835; }
+        50% { border-color: #00A968; }
+        67% { border-color: #1E88E5; }
+        83% { border-color: #8E24AA; }
+        100% { border-color: #E53935; }
+      }
+
+      /* Animated border for suggestions list during loading (kept as is) */
+      .suggestions-list-loading-border {
+        border-left-width: 2px;
+        border-right-width: 2px;
+        border-bottom-width: 2px;
+        border-top-width: 0px; 
+        border-style: solid;
+        animation-duration: 1.5s;
+        animation-timing-function: linear;
+        animation-iteration-count: infinite;
+      }
+      html:not(.dark) .suggestions-list-loading-border {
+        animation-name: rgb-border-animation-light; 
+         border-left-color: #FF5252; 
+         border-right-color: #FF5252;
+         border-bottom-color: #FF5252;
+         border-top-color: transparent; 
+      }
+      html.dark .suggestions-list-loading-border {
+        animation-name: rgb-border-animation-dark; 
+        border-left-color: #E53935; 
+        border-right-color: #E53935;
+        border-bottom-color: #E53935;
+        border-top-color: transparent; 
+      }
+
+
+      /* Logo Flash Animation */
+      @keyframes logoFlashEffect {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.8; transform: scale(1.05); filter: brightness(1.75); }
+      }
+      .logo-flash-animation {
+        animation: logoFlashEffect 0.7s ease-in-out;
+      }
+
+      /* Settings Icon Spin Animation */
+      @keyframes settingsIconSpin {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .settings-icon-animate {
+        animation: settingsIconSpin 0.4s ease-in-out;
+        will-change: transform; 
+      }
+
+
+      .homepage-button {
+        background-color: #f8f9fa; 
+        border: 1px solid #f8f9fa;
+        border-radius: 4px;
+        color: #3c4043; 
+        font-family: Inter, sans-serif;
+        font-size: 14px;
+        margin: 11px 4px;
+        padding: 0 16px;
+        line-height: 27px;
+        height: 36px;
+        min-width: 54px;
+        text-align: center;
+        cursor: pointer;
+        user-select: none;
+      }
+      .homepage-button:hover {
+        border-color: #dadce0;
+        box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+        background-color: #f8f9fa; 
+        color: #202124; 
+      }
+      html.dark .homepage-button {
+        background-color: #303134; 
+        border-color: #303134;
+        color: #e8eaed; 
+      }
+      html.dark .homepage-button:hover {
+        border-color: #5f6368; 
+        box-shadow: 0 1px 1px rgba(0,0,0,0.1); 
+        background-color: #3c4043; 
+      }
+
+      /* AI Assistant Modal, Settings Modal, Image Detail Modal, Permission Info Modal (Shared Structure) */
+      .assistant-modal-overlay, .settings-modal-overlay, .image-detail-modal-overlay, .permission-info-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.7); 
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 40; 
+        padding: 1rem; 
+      }
+      .assistant-modal-content, .settings-modal-content, .image-detail-modal-content, .permission-info-modal-content {
+        background-color: rgba(255, 255, 255, 0.88); 
+        -webkit-backdrop-filter: blur(8px); 
+        backdrop-filter: blur(8px); 
+        padding: 1rem; 
+        border-radius: 8px;
+        box-shadow: 0 4px 25px rgba(0, 0, 0, 0.25); 
+        width: 100%; 
+        display: flex;
+        flex-direction: column;
+        overflow: hidden; 
+      }
+      /* AI Assistant Specific & AI Notebook (can share this for now) */
+      .assistant-modal-content {
+        max-width: 600px;
+        height: 90vh; 
+        max-height: 700px;
+      }
+      /* Settings Modal & Permission Info Modal Specific */
+      .settings-modal-content, .permission-info-modal-content {
+        max-width: 400px; 
+        max-height: 80vh; 
+      }
+      /* Image Detail Modal Specific */
+      .image-detail-modal-content {
+        max-width: 90vw; 
+        max-height: 90vh;
+        height: auto; 
+      }
+       html.dark .image-detail-modal-content {
+         background-color: rgba(45, 55, 72, 0.88); 
+       }
+
+      /* Privacy Policy & Terms and Conditions Page Styles */
+      .privacy-policy-page-container, .terms-conditions-page-container {
+        max-width: 800px; 
+        margin: 0 auto; 
+        padding: 1rem; 
+      }
+       @media (min-width: 640px) { 
+          .privacy-policy-page-container, .terms-conditions-page-container {
+            padding: 2rem;
+          }
+       }
+
+
+
+      @media (min-width: 640px) { 
+        .assistant-modal-content, .settings-modal-content, .image-detail-modal-content, .permission-info-modal-content {
+            padding: 20px; 
+        }
+         .image-detail-modal-content {
+            max-width: 800px; 
+         }
+      }
+      html.dark .assistant-modal-content, html.dark .settings-modal-content, html.dark .permission-info-modal-content {
+        background-color: rgba(75, 85, 99, 0.88); 
+      }
+      .assistant-modal-header, .settings-modal-header, .permission-info-modal-header { 
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid rgba(226, 232, 240, 0.5); 
+        padding-bottom: 12px;
+        margin-bottom: 12px;
+      }
+      html.dark .assistant-modal-header, html.dark .settings-modal-header, html.dark .permission-info-modal-header {
+        border-bottom-color: rgba(107, 114, 128, 0.5); 
+      }
+      .assistant-chat-area {
+        flex-grow: 1;
+        overflow-y: auto;
+        padding: 8px 0;
+        display: flex;
+        flex-direction: column;
+      }
+      .assistant-chat-message {
+        padding: 8px 12px;
+        border-radius: 18px;
+        margin-bottom: 8px;
+        max-width: 80%;
+        word-wrap: break-word; 
+        line-height: 1.5;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1); 
+      }
+      .assistant-chat-message.user {
+        background-color: #0077B6; 
+        color: white;
+        align-self: flex-end;
+        border-bottom-right-radius: 6px; 
+      }
+      html.dark .assistant-chat-message.user {
+        background-color: #00A968; 
+        color: #1A202C; 
+      }
+      .assistant-chat-message.model {
+        background-color: #e9edf1; 
+        color: #2d3748; 
+        align-self: flex-start;
+        border-bottom-left-radius: 6px;
+      }
+      html.dark .assistant-chat-message.model {
+        background-color: #525c6b; 
+        color: #e2e8f0; 
+      }
+       .assistant-chat-message.model .markdown-content p:first-child {
+        margin-top: 0;
+      }
+      .assistant-chat-message.model .markdown-content p:last-child {
+        margin-bottom: 0;
+      }
+      .assistant-modal-input-area {
+        border-top: 1px solid rgba(226, 232, 240, 0.5); 
+        padding-top: 12px;
+        display: flex;
+        flex-wrap: wrap; 
+        align-items: center;
+        gap: 8px;
+      }
+      html.dark .assistant-modal-input-area {
+        border-top-color: rgba(107, 114, 128, 0.5); 
+      }
+
+      /* Widget Card Base Styles */
+      .widget-card {
+        margin-bottom: 1rem; 
+      }
+      html.dark .widget-card {
+      }
+      .direct-answer-card {}
+      .currency-converter-widget {}
+      .sports-widget {}
+      .weather-widget {}
+      .entity-info-panel {} 
+
+
+      /* Confetti Animation */
+      .confetti-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        overflow: hidden;
+        z-index: 10;
+      }
+
+      .confetti {
+        position: absolute;
+        width: 8px;
+        height: 16px;
+        background-color: #f00; 
+        opacity: 0;
+        animation: fall 3s linear infinite;
+      }
+
+      @keyframes fall {
+        0% {
+          transform: translateY(-20vh) rotateZ(0deg);
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(120vh) rotateZ(720deg);
+          opacity: 0;
+        }
+      }
+
+      /* Loading Clock Animations */
+      @keyframes rgb-clock-face-border-animation-light {
+        0% { border-color: #FF5252; }
+        17% { border-color: #FFAB40; }
+        33% { border-color: #FFFF00; }
+        50% { border-color: #00E676; }
+        67% { border-color: #40C4FF; }
+        83% { border-color: #7C4DFF; }
+        100% { border-color: #FF5252; }
+      }
+      @keyframes rgb-clock-face-border-animation-dark {
+        0% { border-color: #E53935; }
+        17% { border-color: #FB8C00; }
+        33% { border-color: #FDD835; }
+        50% { border-color: #00A968; }
+        67% { border-color: #1E88E5; }
+        83% { border-color: #8E24AA; }
+        100% { border-color: #E53935; }
+      }
+
+      @keyframes rgb-clock-hand-bg-animation-light {
+        0% { background-color: #FF5252; }
+        17% { background-color: #FFAB40; }
+        33% { background-color: #FFFF00; }
+        50% { background-color: #00E676; }
+        67% { background-color: #40C4FF; }
+        83% { background-color: #7C4DFF; }
+        100% { background-color: #FF5252; }
+      }
+      @keyframes rgb-clock-hand-bg-animation-dark {
+        0% { background-color: #E53935; }
+        17% { background-color: #FB8C00; }
+        33% { background-color: #FDD835; }
+        50% { background-color: #00A968; }
+        67% { background-color: #1E88E5; }
+        83% { background-color: #8E24AA; }
+        100% { background-color: #E53935; }
+      }
+      
+      @keyframes secnto-tick {
+        from { transform: translateX(-50%) rotate(0deg); }
+        to { transform: translateX(-50%) rotate(360deg); }
+      }
+
+      .clock-face-animated {
+          border-width: 4px;
+          border-style: solid;
+          animation-duration: 2s; 
+          animation-timing-function: linear;
+          animation-iteration-count: infinite;
+      }
+      html:not(.dark) .clock-face-animated {
+          animation-name: rgb-clock-face-border-animation-light; 
+          border-color: #FF5252; 
+      }
+      html.dark .clock-face-animated {
+          animation-name: rgb-clock-face-border-animation-dark; 
+          border-color: #E53935; 
+      }
+
+      .secnto-clock-hand-animated {
+          width: 4px; 
+          height: 26px;
+          position: absolute;
+          bottom: 50%;
+          left: 50%;
+          transform-origin: bottom center;
+          animation-timing-function: linear, linear; 
+          animation-iteration-count: infinite, infinite; 
+      }
+      html:not(.dark) .secnto-clock-hand-animated {
+          animation-name: secnto-tick, rgb-clock-hand-bg-animation-light; 
+          animation-duration: 1.2s, 2s; 
+          background-color: #FF5252; 
+      }
+      html.dark .secnto-clock-hand-animated {
+          animation-name: secnto-tick, rgb-clock-hand-bg-animation-dark; 
+          animation-duration: 1.2s, 2s; 
+          background-color: #E53935; 
+      }
+
+      /* Local Search Map Container */
+      .local-search-map-container {
+        width: 100%;
+        height: 300px; 
+        border-radius: 0.5rem; 
+        overflow: hidden; 
+        border: 1px solid #e2e8f0; 
+      }
+      html.dark .local-search-map-container {
+        border-color: #4A5568; 
+      }
+      @media (min-width: 640px) { 
+        .local-search-map-container {
+          height: 350px;
+        }
+      }
+       @media (min-width: 1024px) { 
+        .lg\\:two-column-map-height { 
+          height: calc(100vh - 200px); 
+          min-height: 400px;
+        }
+      }
+
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.1.0",
+    "react-dom/": "https://esm.sh/react-dom@^19.1.0/",
+    "react/": "https://esm.sh/react@^19.1.0/",
+    "@google/genai": "https://esm.sh/@google/genai@^1.1.0",
+    "@/App": "./App.tsx",
+    "@/components/SearchBar": "./components/SearchBar.tsx",
+    "@/components/SearchTabs": "./components/SearchTabs.tsx",
+    "@/components/SearchTools": "./components/SearchTools.tsx",
+    "@/components/ResultsArea": "./components/ResultsArea.tsx",
+    "@/components/Footer": "./components/Footer.tsx",
+    "@/components/LoadingSpinner": "./components/LoadingSpinner.tsx",
+    "@/components/ResultItemCard": "./components/ResultItemCard.tsx",
+    "@/components/Dashboard": "./components/Dashboard.tsx",
+    "@/components/LocationPrompt": "./components/LocationPrompt.tsx",
+    "@/components/Logo": "./components/Logo.tsx",
+    "@/components/ThemeToggle": "./components/ThemeToggle.tsx",
+    "@/components/LanguageToggle": "./components/LanguageToggle.tsx",
+    "@/components/AiAssistantIcon": "./components/AiAssistantIcon.tsx",
+    "@/components/AiAssistantModal": "./components/AiAssistantModal.tsx",
+    "@/components/AiNotebookModal": "./components/AiNotebookModal.tsx",
+    "@/components/SettingsModal": "./components/SettingsModal.tsx",
+    "@/components/DirectAnswerCard": "./components/DirectAnswerCard.tsx",
+    "@/components/CurrencyConverterWidget": "./components/CurrencyConverterWidget.tsx",
+    "@/components/SportsWidget": "./components/SportsWidget.tsx",
+    "@/components/WeatherWidget": "./components/WeatherWidget.tsx",
+    "@/components/EntityInfoPanelWidget": "./components/EntityInfoPanelWidget.tsx",
+    "@/components/AdsWidget": "./components/AdsWidget.tsx",
+    "@/components/ImageDetailModal": "./components/ImageDetailModal.tsx",
+    "@/components/LogoutConfirmModal": "./components/LogoutConfirmModal.tsx",
+    "@/components/LocalResultsMap": "./components/LocalResultsMap.tsx",
+    "@/components/InitialPermissionModal": "./components/InitialPermissionModal.tsx",
+    "@/components/PrivacyPolicyPage": "./components/PrivacyPolicyPage.tsx",
+    "@/components/TermsAndConditionsPage": "./components/TermsAndConditionsPage.tsx",
+    "@/services/geminiService": "./services/geminiService.ts",
+    "./App": "./App.tsx",
+    "firebase/": "https://esm.sh/firebase@^11.8.1/"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+    <script>
+      // The global initMap function that dispatched a custom event has been removed.
+      // App.tsx will define window.initMap for the Google Maps API callback.
+
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/service-worker.js')
+            .then(registration => {
+              console.log('ServiceWorker registration successful with scope: ', registration.scope);
+            })
+            .catch(error => {
+              console.log('ServiceWorker registration failed: ', error);
+            });
+        });
+      }
+    </script>
+  </body>
+</html>

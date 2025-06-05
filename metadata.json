@@ -1,0 +1,10 @@
+{
+  "name": "V3 Secnto AI Search Engine",
+  "description": "Secnto: Pakistan’s first ultra-fast and privacy-focused AI-powered search engine and digital platform concept.",
+  "requestFramePermissions": [
+    "microphone",
+    "geolocation",
+    "camera"
+  ],
+  "prompt": ""
+}

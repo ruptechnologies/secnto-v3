@@ -1,0 +1,53 @@
+{
+  "name": "v3-secnto-ai-search-engine",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "@google/genai": "^1.1.0",
+    "@/App": "latest",
+    "@/components/SearchBar": "latest",
+    "@/components/SearchTabs": "latest",
+    "@/components/SearchTools": "latest",
+    "@/components/ResultsArea": "latest",
+    "@/components/Footer": "latest",
+    "@/components/LoadingSpinner": "latest",
+    "@/components/ResultItemCard": "latest",
+    "@/components/Dashboard": "latest",
+    "@/components/LocationPrompt": "latest",
+    "@/components/Logo": "latest",
+    "@/components/ThemeToggle": "latest",
+    "@/components/LanguageToggle": "latest",
+    "@/components/AiAssistantIcon": "latest",
+    "@/components/AiAssistantModal": "latest",
+    "@/components/AiNotebookModal": "latest",
+    "@/components/SettingsModal": "latest",
+    "@/components/DirectAnswerCard": "latest",
+    "@/components/CurrencyConverterWidget": "latest",
+    "@/components/SportsWidget": "latest",
+    "@/components/WeatherWidget": "latest",
+    "@/components/EntityInfoPanelWidget": "latest",
+    "@/components/AdsWidget": "latest",
+    "@/components/ImageDetailModal": "latest",
+    "@/components/LogoutConfirmModal": "latest",
+    "@/components/LocalResultsMap": "latest",
+    "@/components/InitialPermissionModal": "latest",
+    "@/components/PrivacyPolicyPage": "latest",
+    "@/components/TermsAndConditionsPage": "latest",
+    "@/services/geminiService": "latest",
+    "./App": "latest",
+    "firebase": "^11.8.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "typescript": "~5.7.2",
+    "vite": "^6.2.0"
+  }
+}
